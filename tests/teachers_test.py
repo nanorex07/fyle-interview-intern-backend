@@ -1,3 +1,20 @@
+from core.apis.teachers.schema import UserSchema
+from core.models.assignments import GradeEnum
+from core.models.users import User
+from marshmallow.exceptions import ValidationError as MVE
+
+
+def test_access_teacher(client, h_principal):
+    """
+    failure case: a teacher must access teachers end point
+    """
+    response = client.get(
+        "/teacher/assignments",
+        headers=h_principal
+    )
+    assert response.status_code == 403
+    assert response.json["error"] == "FyleError"
+
 def test_get_assignments_teacher_1(client, h_teacher_1):
     response = client.get(
         '/teacher/assignments',
@@ -99,3 +116,63 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+
+
+def test_grade_assignment_teacher_1(client, h_teacher_1):
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1,
+        json={
+            "id": 1,
+            "grade": GradeEnum.B.value
+        }
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert data['id'] == 1
+    assert data['teacher_id'] == 1
+    assert data['grade'] == 'B'
+    assert data['state'] == 'GRADED'
+
+
+def test_grade_assignment_teacher_2(client, h_teacher_2):
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_2,
+        json={
+            "id": 2,
+            "grade": GradeEnum.C.value
+        }
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert data['id'] == 2
+    assert data['teacher_id'] == 2
+    assert data['grade'] == 'C'
+    assert data['state'] == 'GRADED'
+
+
+
+def test_grade_assignment_regrade(client, h_teacher_1):
+    """
+    failure case: teacher can not regrade an assignment
+    """
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_1
+        ,json={
+            "id": 1,
+            "grade": GradeEnum.A.value
+        }
+    )
+
+    assert response.status_code == 400
+    data = response.json
+    assert data['error'] == 'FyleError'
+
+    

@@ -1,3 +1,15 @@
+def test_access_student(client, h_principal):
+    """
+    failure case: a student must access student end point
+    """
+    response = client.get(
+        "/student/assignments",
+        headers=h_principal
+    )
+    assert response.status_code == 403
+    assert response.json["error"] == "FyleError"
+
+
 def test_get_assignments_student_1(client, h_student_1):
     response = client.get(
         '/student/assignments',

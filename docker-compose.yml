@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  fyle-backend-service:
+    build: .
+    ports:
+      - "7755:7755"
+    environment:
+      - FLASK_APP=core/server.py
+      - GUNICORN_PORT=7755
+    volumes:
+      - .:/application
+    command: bash run.sh

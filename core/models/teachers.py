@@ -1,5 +1,7 @@
 from core import db
-from core.libs import helpers
+from core.apis.decorators import AuthPrincipal
+from core.libs import assertions, helpers
+from core.models.users import User
 
 
 class Teacher(db.Model):
@@ -11,3 +13,12 @@ class Teacher(db.Model):
 
     def __repr__(self):
         return '<Teacher %r>' % self.id
+
+    # @classmethod
+    # def filter(cls, *criterion):
+    #     db_query = db.session.query(cls)
+    #     return db_query.filter(*criterion)
+
+    @classmethod
+    def list_teachers(cls):
+        return db.session.query(User).filter(User.id == cls.user_id).all()
